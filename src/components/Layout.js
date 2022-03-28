@@ -33,6 +33,12 @@ const Layout = (props) => {
     },[]);
 
     const logout = async () => {
+
+        axios.post(`${API_URL}/api/logout`,{},{
+            headers:{
+                Authorization: 'Bearer '+props.AuthStore.appState?.user?.access_token
+            }
+        });
         await props.AuthStore.remove();
         history.push('/login');
     }
