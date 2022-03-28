@@ -17,7 +17,7 @@ class AuthStore {
     async save(appState)
     {
         try {
-            await localStorage.setItem('appState',appState);
+            await localStorage.setItem('appState',JSON.stringify(appState));
         } catch (e) 
         {
             console.log(e);    
@@ -30,7 +30,7 @@ class AuthStore {
             const appValue = localStorage.getItem('appState');
             if (appValue) 
             {
-                this.appState = appValue;    
+                this.appState = JSON.parse(appValue);    
             }
             else
             {

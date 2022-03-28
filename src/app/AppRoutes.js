@@ -1,5 +1,7 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Route, Redirect, Switch } from 'react-router-dom';
+import { observer, inject } from "mobx-react";
+import PrivateRoutes from "./PrivateRoutes";
 
 const Home = lazy(() => import('./Home'));
 const Login = lazy(() => import('./Login'));
@@ -8,11 +10,15 @@ const Profile = lazy(() => import('./Profile'));
 const Support = lazy(() => import('./Support'));
 
 
-const AppRoutes = () => {
+const AppRoutes = (props) => {
+
+    useEffect(() => {
+        props.AuthStore.get();
+    }, []);
     return (
         <Suspense fallback={<div>fallback</div>}>
             <Switch>
-                <Route exact path="/" component={Home} />
+                <PrivateRoutes exact path="/" component={Home} />
                 <Route path="/login" component={Login} />
                 <Route path="/register" component={Register} />
                 <Route path="/profile" component={Profile} />
@@ -21,4 +27,4 @@ const AppRoutes = () => {
         </Suspense>)
 };
 
-export default AppRoutes;
+export default inject("AuthStore")(observer(AppRoutes));
