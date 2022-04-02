@@ -8,6 +8,8 @@ import { observer, inject } from "mobx-react";
 import axios from "axios";
 import Layout from "../../components/Layout";
 import { useParams, useHistory } from "react-router-dom";
+import { toJS } from "mobx";
+
 
 
 
@@ -18,10 +20,11 @@ const Demand = (props) => {
     const history = useHistory();
     const [errors, setErrors] = useState([]);
     const [error, setError] = useState(null);
-    const [message, setMessage] = useState([]);
+    const [messages, setMessage] = useState([]);
     const [demand, setDemand] = useState({});
     const [loading, setLoading] = useState(true);
 
+    console.log(toJS(messages));
 
     useEffect(() => {
         axios.get(`${API_URL}/api/demand/${id}`, {
@@ -47,17 +50,22 @@ const Demand = (props) => {
 
     const _handleSubmit = async (values, { setSubmitting, resetForm }) => {
 
-        await axios.post(`${API_URL}/api/demand`, {
-            ...values
+        await axios.post(`${API_URL}/api/demand/message`, {
+            ...values,
+            id
         }, {
             headers: {
                 Authorization: 'Bearer ' + props.AuthStore.appState.user.access_token
             }
         }).then(async (result) => {
+            console.log(result);
             if (result.data.success) {
                 resetForm({});
+                setMessage([...result.data.message]);
             }
-            alert(result.data.message);
+            else {
+                alert(result.data.message);
+            }
         })
             .catch((error) => {
                 setSubmitting(false);
@@ -82,6 +90,7 @@ const Demand = (props) => {
     })
 
     if (loading) { return <div>Yükleniyor</div> }
+    console.log(demand);
     return (
         <Layout>
             <div className="container mt-3">
@@ -95,63 +104,80 @@ const Demand = (props) => {
 
                         <div className="demand-form">
                             <div className="form-group">
-                                <b>{demand.created_at}</b>
-                                <p>{demand.text}</p>
+                                <p> Talep Durumu: {demand.status == 0 ? 'Açık' : 'Kapalı'}
+                                    <hr />
+                                    {demand.text}
+                                    <br />
+                                    <small>{demand.date}</small>
+                                </p>
                             </div>
 
                         </div>
                     </div>
                 </div>
 
-                <div className="card mt-5">
-                    <div className="card-header">Açıklama Gönder</div>
-                    <div className="card-body">
+                <div className="mt-2 mb-2">
 
-
-                        <Formik initialValues={{
-                            text: '',
-                        }}
-                            onSubmit={_handleSubmit}
-                            validationSchema={Yup.object().shape({
-                                text: Yup.string().required("Mesaj zorunludur"),
-                            })}
-                        >
-                            {({
-                                handleSubmit,
-                                handleChange,
-                                handleBlur,
-                                isSubmitting,
-                                values,
-                                touched,
-                                errors,
-                                isValid
-                            }) => (
-                                <div className="demand-form">
-                                    <div className="form-group">
-                                        <label>Mesajınız</label>
-                                        <textarea
-                                            onBlur={handleBlur}
-                                            onChange={handleChange}
-                                            name="text"
-                                            value={values.text}
-                                            type="text"
-                                            className="form-control">
-
-                                        </textarea>
-                                        {(errors.text && touched.text) && <p>{errors.text}</p>}
-                                    </div>
-
-                                    <div className="form-group d-flex align-items-center justify-content-center">
-                                        <button
-                                            disabled={!isValid || isSubmitting}
-                                            onClick={handleSubmit}
-                                            className="button ">Gönder</button>
-                                    </div>
-                                </div>
-                            )}
-                        </Formik>
-                    </div>
+                    {messages.map((item) => (
+                        <li className="list-group-item" >
+                            <b> {item.user.name}</b><br />
+                            {item.text}<br />
+                            <small>{item.date}</small>
+                        </li>
+                    ))}
                 </div>
+
+                { demand.status == 0 &&
+                    <div className="card mt-5">
+                        <div className="card-header">Açıklama Gönder</div>
+                        <div className="card-body">
+
+
+                            <Formik initialValues={{
+                                text: '',
+                            }}
+                                onSubmit={_handleSubmit}
+                                validationSchema={Yup.object().shape({
+                                    text: Yup.string().required("Mesaj zorunludur"),
+                                })}
+                            >
+                                {({
+                                    handleSubmit,
+                                    handleChange,
+                                    handleBlur,
+                                    isSubmitting,
+                                    values,
+                                    touched,
+                                    errors,
+                                    isValid
+                                }) => (
+                                    <div className="demand-form">
+                                        <div className="form-group">
+                                            <label>Mesajınız</label>
+                                            <textarea
+                                                onBlur={handleBlur}
+                                                onChange={handleChange}
+                                                name="text"
+                                                value={values.text}
+                                                type="text"
+                                                className="form-control">
+
+                                            </textarea>
+                                            {(errors.text && touched.text) && <p>{errors.text}</p>}
+                                        </div>
+
+                                        <div className="form-group d-flex align-items-center justify-content-center">
+                                            <button
+                                                disabled={!isValid || isSubmitting}
+                                                onClick={handleSubmit}
+                                                className="button ">Gönder</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </Formik>
+                        </div>
+                    </div>
+                }
             </div >
         </Layout >
     )

@@ -11,6 +11,7 @@ import axios from "axios";
 
 const Register = (props) => {
 
+    console.log(props);
     const [errors, setErrors] = useState([]);
     const [error, setError] = useState(null);
 

@@ -37,7 +37,12 @@ const Home = (props) => {
                     <ul className="list-group list-group-flush">
                         {data.length == 0 && <li className="list-group-item">Aktif Talebiniz Bulunamadı</li>}
                         {data.length > 0 && data.map((item) => (
-                            <Link to={`/talep-detay/${item.id}`}><li className="list-group-item">{item.title}</li></Link>
+                            <Link to={`/talep-detay/${item.id}`} style={{ textDecoration:'none' }}>
+                                <li className="list-group-item" style={{ backgroundColor:( item.status == 1 ) ? '#F44336' : 'white', color: ( item.status == 1 ) ? 'white' : 'black' }}>
+                                    {item.title}
+                                    <span> ({item.count })</span>
+                                </li>
+                            </Link>
 
                         ))}
                     </ul>
